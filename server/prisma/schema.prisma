@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model kelurahan {
+  id   Int    @id @default(autoincrement())
+  nama String @db.VarChar(255)
+}
+
+model maps {
+  id           Int    @id @default(autoincrement())
+  nama_maps    String @db.VarChar(255)
+  kelurahan_id Int
+}
+
+model LuasKelurahan {
+  id             Int    @id @default(autoincrement())
+  nama_kelurahan String
+  luas_wilayah   Float
+  map String
+}
+
+model penerima {
+  no           Int     @id @default(autoincrement()) @db.UnsignedInt
+  nama         String? @db.VarChar(255)
+  alamat       String? @db.VarChar(255)
+  kelurahan_id String?
+  kelurahan    String? 
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model amil {
+  Nama           String? @db.VarChar(255)
+  Alamat         String? @db.VarChar(255)
+  kelurahan_kode String? @db.VarChar(255)
+  kelurahan_nama String? @db.VarChar(255)
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model mustahik {
+  Nama           String? @db.VarChar(255)
+  alamat         String? @db.VarChar(255)
+  kelurahan_kode String? @db.VarChar(255)
+  kelurahan_nama String? @db.VarChar(255)
+
+  @@ignore
+}
