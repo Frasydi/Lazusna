@@ -13,12 +13,17 @@ const Home = () => {
   }, [search])
   const [lura, setLura] = useState([]);
   // console.log(lura.le);
-
+  const [tipe, setTipe] = useState("mustahik")
+  const [count, setCount] = useState({
+    mustahik : 0,
+    penerima : 0,
+    amil : 0
+  })
   useEffect(() => {
     const fetchKelurahan = async () => {
       try {
         const { data: response } = await axios.get(
-          "http://localhost:8000/api/kelurahan"
+          "/api/kelurahan"
         );
         console.log(response)
         setKelurahan(response);
@@ -26,25 +31,33 @@ const Home = () => {
       } catch (err) {
         console.log(err.message);
       }
-    };
+    }; 
 
     fetchKelurahan();
   }, []);
 
+
+  useEffect(() => {
+    axios.get("/api/countall/"+search).then(res => {
+      setCount(res.data)
+    })
+  }, [search])
+
+  useEffect(() => {
+    axios.get(`/api/${tipe}/${search}`)
+    .then((res) => {
+      // console.log(res.data);
+      setLura(res.data)
+    })
+  }, [search, tipe])
   const listUser = async () => {
     setShow(!show);
     // console.log(lura );
   };
-
+  
   const handleClick = (e, a) => {
     console.log(e);
     setSearch(e)
-    console.log(a);
-      axios.get(`http://localhost:8000/api/list/${a}`)
-      .then((res) => {
-        // console.log(res.data);
-        setLura(res.data)
-      })
   }
   return (
     <div>
@@ -78,7 +91,7 @@ const Home = () => {
               width="100%"
               height="450"
               style={{ border: "0" }}
-              allowfullscreen=""
+              allowFullScreen={true}
               loading="lazy"
               referrerpolicy="no-referrer-when-downgrade"
             ></iframe>
@@ -106,7 +119,37 @@ const Home = () => {
       {/* {show ? <TableSearch /> : null} */}
       {
         lura.length > 0 ? (
-          <TableSearch lura={lura}  />
+          <>
+          <div style={{display:"flex", justifyContent:"center", alignItems:'center',flexDirection:"column"}}>
+            <h2>Jumlah</h2>
+            <ol>
+              <li>Muzakki : {count.muzakki}</li>
+              <li>Mustahik : {count.mustahik}</li>
+              <li>Amil : {count.amil}</li>
+            </ol>
+          <br />
+          <br />
+            <h2>Perbandingan Amil dengan muzakki dan mustahik</h2>
+            <ul>
+              <li>Perbandingan amil dan muzakki : 1 amil dapat mendapatkan dana dari {Math.floor(count.muzakki/count.amil)} muzakki</li>
+              <li>Perbandingan amil dan mustahik : 1 amil dapat memberikan dana untuk {Math.floor(count.mustahik/count.amil)} mustahik</li>
+            </ul>
+          </div>
+
+          <div style={{display:"flex", justifyContent:"center"}}>
+
+          <select name="tipe" id="tipe" onChange={(ev) => {
+            setTipe(ev.target.value)
+          } }>
+            <option value="muzakki">Muzakki</option>
+            <option value="mustahik">Mustahik</option>
+            <option value="amil">Amil</option>
+          </select>
+            </div>
+      <h2 style={{fontWeight:"bolder", textAlign:"center",fontSize :"x-large"}}>{tipe}</h2>
+
+          <TableSearch tipe={tipe} lura={lura}  />
+          </>
         ) : (
            <div><h1>ok</h1></div>
         )
@@ -165,9 +208,9 @@ const TableSearch = (lura) => {
         dataLuru.map((item) => (
           <tbody style={{ textAlign: "center" }}>
           <tr>
-            <td>{item.nama}</td>
-            <td>{item.alamat}</td>
-            <td>{item.kelurahan}</td>
+            <td>{lura.tipe != "mustahik" ?  item.Nama: item.nama}</td>
+            <td>{lura.tipe != "amil" ?item.alamat : item.Alamat}</td>
+            <td>{lura.tipe != "mustahik" ?  item.kelurahan_nama : item.kelurahan }</td>
             <td>Makassar</td>
           </tr>
         </tbody>
